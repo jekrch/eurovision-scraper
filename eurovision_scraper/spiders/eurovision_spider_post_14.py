@@ -4,8 +4,8 @@ from eurovision_scraper.spiders.country_data import country_map
 
 
 class EurovisionSpider(scrapy.Spider):
-    name = 'eurovision'
-    start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in range(1956, 2013)]
+    name = 'eurovision_post_14'
+    start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in range(2014, 2023)]
 
     def parse(self, response):
 
@@ -13,7 +13,34 @@ class EurovisionSpider(scrapy.Spider):
 
         try:
             year = response.url.split('_')[-1]
-            results = []               
+            results = []
+
+            if int(year) > 2015:
+                row_idx_adjust = 3
+                header_adjust = 1
+                
+                jury_results = self.parse_table(response, year, 'Detailed jury voting results of the final', 'final', 'jury', 4, header_adjust)
+                results.extend(jury_results)
+                
+                tele_results = self.parse_table(response, year, 'Detailed televoting results of the final', 'final', 'tele', 4, header_adjust)
+                results.extend(tele_results)
+                
+                # semi final 1
+                sf_1_jury_results = self.parse_table(response, year, 'Detailed jury voting results of semi-final 1', 'semi-final 1', 'jury', row_idx_adjust, header_adjust)
+                results.extend(sf_1_jury_results)
+                
+                sf_1_tele_results = self.parse_table(response, year, 'Detailed televoting results of semi-final 1', 'semi-final 1', 'tele', row_idx_adjust, header_adjust)
+                results.extend(sf_1_tele_results)
+                
+                # semi final 2
+                sf_2_jury_results = self.parse_table(response, year, 'Detailed jury voting results of semi-final 2', 'semi-final 2', 'jury', row_idx_adjust, header_adjust)
+                results.extend(sf_2_jury_results)
+                
+                sf_2_tele_results = self.parse_table(response, year, 'Detailed televoting results of semi-final 2', 'semi-final 2', 'tele', row_idx_adjust, header_adjust)
+                results.extend(sf_2_tele_results)
+                
+                return results
+                
 
             # there are a few ways that voting results data can be displayed in 
             # each wiki article, which is reflected below. 
@@ -43,7 +70,6 @@ class EurovisionSpider(scrapy.Spider):
                 results.extend(semi_final)
 
             return results
-        
         except Exception as e:
             self.logger.error(f"Error parsing {response.url}: {e}")
             raise
@@ -64,12 +90,20 @@ class EurovisionSpider(scrapy.Spider):
                 f"//table[contains(@class, 'wikitable') and "
                 f"(./preceding::h2[contains(., '{table_header}')] or ./caption[contains(., '{table_header}')])]"
             )
+            # print(f"parsing {table_header}")
+            # table_selector = response.xpath(
+            #     f"//table[caption[contains(text(), '{table_header}')]]"
+            # )
+            # if not table_selector:
+            #     self.logger.info(f"No '{table_header}' table found for {response.url}")
+            #     return []
 
             table = table_selector[0]
             rows = table.xpath(".//tr")
             header_row = rows[0 + row_idx_adjust]
             data_rows = rows[1 + row_idx_adjust:]
-
+            ##print('#### header')
+            ##print(header_row)
             for row in data_rows:
                 country_cell = row.xpath(".//th")[0]
                 country = country_cell.xpath(".//text()").get().strip()
@@ -81,12 +115,16 @@ class EurovisionSpider(scrapy.Spider):
 
                 points = [td.xpath(".//text()").get().strip() if td.xpath(".//text()").get() else None
                           for td in row.xpath(".//td")]                          
+                          #for td in row.xpath(".//td")][header_idx_adjust:]
 
+                # print('#### points')
+                # print(points)
                 for i, point in enumerate(points, start=2):
                     if point is None or point == '':
                         continue
                 
                     voting_country_cell = header_row.xpath(f".//th[{i + header_idx_adjust}]")[0]
+                    #voting_country_cell = header_row.xpath(f".//th[{(i - row_idx_adjust)}]")[0]
                     voting_country = voting_country_cell.xpath(".//text()").get().strip()
 
                     # we should skip this point value in two scenarios 
