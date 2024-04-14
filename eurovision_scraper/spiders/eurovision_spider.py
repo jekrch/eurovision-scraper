@@ -92,7 +92,7 @@ class EurovisionSpider(scrapy.Spider):
                     # we should skip this point value in two scenarios 
                     # 1. if the voting_country has an html name or is called 'Total score', it's a total count, which we aren't tracking here 
                     # 2. if the voting_country and country are the same, skip it (we don't want totals here)
-                    if voting_country.startswith('.') or voting_country == 'Total score' or voting_country == country or ' score' in voting_country:
+                    if voting_country.startswith('.') or voting_country == 'Total score' or voting_country == country or ' score' in voting_country or country_map.get(voting_country) == None:
                         continue
 
                     yield {
