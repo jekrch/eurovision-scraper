@@ -5,7 +5,7 @@ from eurovision_scraper.spiders.country_data import country_map
 
 class EurovisionSpider(scrapy.Spider):
     name = 'eurovision'
-    start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in range(1956, 2013)]
+    start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in range(1956, 2016)]
 
     def parse(self, response):
 
@@ -17,6 +17,20 @@ class EurovisionSpider(scrapy.Spider):
 
             # there are a few ways that voting results data can be displayed in 
             # each wiki article, which is reflected below. 
+
+            # the 2013 page uses its own table headers
+            if year == '2013':
+                final_results = self.parse_table(response, year, 'Final voting results', 'f', 't', 0)
+                results.extend(final_results)
+            
+                semi_final1 = self.parse_table(response, year, 'Semi-final 1 voting results', 'sf1', 't', 0)
+                results.extend(semi_final1)
+
+                semi_final2 = self.parse_table(response, year, 'Semi-final 2 voting results', 'sf2', 't', 0)
+                results.extend(semi_final2)
+                
+                return results
+
 
             # first try to get the final results from pages where there are also semi-finals
             final_results = self.parse_table(response, year, 'Detailed voting results of the final', 'f', 't', -1)
@@ -46,7 +60,7 @@ class EurovisionSpider(scrapy.Spider):
         
         except Exception as e:
             self.logger.error(f"Error parsing {response.url}: {e}")
-            raise
+            #raise
 
     def parse_table(self, response, year, table_header, round_name, vote_type, header_idx_adjust, row_idx_adjust = 0):
         '''
@@ -71,6 +85,11 @@ class EurovisionSpider(scrapy.Spider):
             data_rows = rows[1 + row_idx_adjust:]
 
             for row in data_rows:
+                
+                if not row.xpath(".//th"):
+                    print(row)
+                    continue
+                
                 country_cell = row.xpath(".//th")[0]
                 country = country_cell.xpath(".//text()").get().strip()
 
@@ -106,4 +125,5 @@ class EurovisionSpider(scrapy.Spider):
 
         except Exception as e:
             self.logger.error(f"Error in parse_table for {response.url}: {e}")
+            #raise
             return []
