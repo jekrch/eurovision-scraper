@@ -5,7 +5,9 @@ from eurovision_scraper.spiders.country_data import country_map
 
 class EurovisionSpider(scrapy.Spider):
     name = 'eurovision_post_15'
-    start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in range(2016, 2024)] 
+    
+    
+    start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in list(range(2016, 2020)) + list(range(2021, 2024))] # note that we're skipping 2020
 
     def parse(self, response):
 
@@ -14,28 +16,27 @@ class EurovisionSpider(scrapy.Spider):
         try:
             year = response.url.split('_')[-1]
             results = []
-
-            row_idx_adjust = 1
-            header_adjust = -1
             
-            jury_results = self.parse_table(response, year, 'Detailed jury voting results of the final', 'f', 'j', header_adjust, row_idx_adjust, 3)
+            # parse the different voting results tables
+            
+            jury_results = self.parse_table(response, year, 'Detailed jury voting results of the final', 'f', 'j')
             results.extend(jury_results)
             
-            tele_results = self.parse_table(response, year, 'Detailed televoting results of the final', 'f', 'tv', header_adjust, row_idx_adjust, 3)
+            tele_results = self.parse_table(response, year, 'Detailed televoting results of the final', 'f', 'tv')
             results.extend(tele_results)
             
             # semi final 1
-            sf_1_jury_results = self.parse_table(response, year, 'Detailed jury voting results of semi-final 1', 'sf1', 'j', header_adjust, row_idx_adjust, 3)
+            sf_1_jury_results = self.parse_table(response, year, 'Detailed jury voting results of semi-final 1', 'sf1', 'j')
             results.extend(sf_1_jury_results)
             
-            sf_1_tele_results = self.parse_table(response, year, 'Detailed televoting results of semi-final 1', 'sf1', 'tv', header_adjust, row_idx_adjust, 3)
+            sf_1_tele_results = self.parse_table(response, year, 'Detailed televoting results of semi-final 1', 'sf1', 'tv')
             results.extend(sf_1_tele_results)
             
             # semi final 2
-            sf_2_jury_results = self.parse_table(response, year, 'Detailed jury voting results of semi-final 2', 'sf2', 'j', header_adjust, row_idx_adjust, 3)
+            sf_2_jury_results = self.parse_table(response, year, 'Detailed jury voting results of semi-final 2', 'sf2', 'j')
             results.extend(sf_2_jury_results)
             
-            sf_2_tele_results = self.parse_table(response, year, 'Detailed televoting results of semi-final 2', 'sf2', 'tv', header_adjust, row_idx_adjust, 3)
+            sf_2_tele_results = self.parse_table(response, year, 'Detailed televoting results of semi-final 2', 'sf2', 'tv')
             results.extend(sf_2_tele_results)
             
             return results
@@ -44,7 +45,7 @@ class EurovisionSpider(scrapy.Spider):
             self.logger.error(f"Error parsing {response.url}: {e}")
             #raise
 
-    def parse_table(self, response, year, table_header, round_name, vote_type, header_idx_adjust, row_idx_adjust = 0, start_point_idx = 0):
+    def parse_table(self, response, year, table_header, round_name, vote_type):
         '''
             Returns voting result data if available. First look for a table with the provided
             header name. If none is found, return empty array. Otherwise, parse the country-country
@@ -55,42 +56,35 @@ class EurovisionSpider(scrapy.Spider):
             need to be selected 
         '''  
         try:
+            
+            # some index positioning variables used for parsing tables. these may need to be tweeked 
+            header_idx_adjust = -1
+            row_idx_adjust = 1
+            start_point_idx = 3
+             
             # the voting results tables are labeled either via an overhead h2 or a table caption
             table_selector = response.xpath(
                 f"//table[contains(@class, 'wikitable') and "
                 f"(./preceding::h2[contains(., '{table_header}')] or ./caption[contains(., '{table_header}')])]"
             )
 
+            if not table_selector:
+                print(f'No table found for {year} with name "{table_header}"')
+                return
+                
             table = table_selector[0]
             rows = table.xpath(".//tr")
+            
             header_row = rows[0 + row_idx_adjust]
             data_rows = rows[1 + row_idx_adjust:]
+            
             ##print('#### header')
             ##print(header_row)
+            
             for row in data_rows:
                 #print(row)
                 
-                td_adjust = 0
-                
-                country_cell = row.xpath(".//th")
-                
-                if not country_cell:                    # If no <th> elements are found
-                    country_cell = row.xpath(".//td")   # Get the <td> elements in the current row
-                    
-                    if country_cell:                    # If any <td> elements are found
-                        country_cell = country_cell[0]  # Take the first <td> element
-                        td_adjust = 1
-                else:                                   # If <th> elements are found
-                    country_cell = country_cell[0]      # Take the first <th> element
-                    
-                country = country_cell.xpath(".//text()").get().strip()
-                #print(country)
-                
-                if country == 'Contestants':
-                    country_cell = row.xpath(".//td")[0]
-                    td_adjust = 1
-                    
-                    country = country_cell.xpath(".//text()").get().strip()
+                td_adjust, country = self.parse_country(row)
                     #print(country)
 
                 points = [td.xpath(".//text()").get().strip() if td.xpath(".//text()").get() else None
@@ -103,16 +97,11 @@ class EurovisionSpider(scrapy.Spider):
                     if point is None or point == '':
                         continue
                 
-                    voting_country_cell = header_row.xpath(f".//th[{i + header_idx_adjust}]")[0]                   
-                    voting_country = voting_country_cell.xpath(".//text()").get().strip()
-
-                    # we should skip this point value in two scenarios 
-                    # 1. if the voting_country has an html name or is called 'Total score', it's a total count, which we aren't tracking here 
-                    # 2. if the voting_country and country are the same, skip it (we don't want totals here)
-                    #print(voting_country)
-                    if voting_country.startswith('.') or voting_country == 'Total score' or voting_country == country or ' score' in voting_country or voting_country == 'Jury':
+                    voting_country = self.parse_voting_country(header_idx_adjust, header_row, country, i)
+                        
+                    if voting_country is None:
                         continue
-
+                    
                     yield {
                         'year': year,
                         'round': round_name,
@@ -125,3 +114,59 @@ class EurovisionSpider(scrapy.Spider):
         except Exception as e:
             self.logger.error(f"Error in parse_table for {response.url}: {e}")
             return []
+
+    def parse_voting_country(self, header_idx_adjust, header_row, country, i):
+        '''
+            Return the name of the voting country responsible for the points at the provided 
+            index, i. This is taken from the header_row with header_idx_adjust used to adjust 
+            the positioning as needed (some tables from certain years have slightly different 
+            formatting)
+        '''
+        
+        voting_country_cell = header_row.xpath(f".//th[{i + header_idx_adjust}]")[0]                   
+        voting_country = voting_country_cell.xpath(".//text()").get().strip()
+
+        # we should skip this point value in two scenarios 
+        # 1. if the voting_country has an html name or is called 'Total score', it's a total count, which we aren't tracking here 
+        # 2. if the voting_country and country are the same, skip it (we don't want totals here)
+        #print(voting_country)
+        if voting_country.startswith('.') or voting_country == 'Total score' or voting_country == country or ' score' in voting_country or voting_country == 'Jury':
+            return None
+
+        # represent the 'Rest of the World' vote as the country pseudo-code 'row'
+        if voting_country == 'Rest of the World':
+            voting_country = 'row'
+            
+        return voting_country
+
+
+    def parse_country(self, row):
+        '''
+            Returns the name of the country being voted for within the provided row. If there's 
+            no th element, the country name is in the first td element instead. In that case set 
+            the td_adjust variable to 1 instead of 0 so that the points are extracted at the correct 
+            index 
+        '''
+        td_adjust = 0
+                
+        country_cell = row.xpath(".//th")
+                
+        if not country_cell:                    # If no <th> elements are found
+            country_cell = row.xpath(".//td")   # Get the <td> elements in the current row
+                    
+            if country_cell:                    # If any <td> elements are found
+                country_cell = country_cell[0]  # Take the first <td> element
+                td_adjust = 1
+        else:                                   # If <th> elements are found
+            country_cell = country_cell[0]      # Take the first <th> element
+                    
+        country = country_cell.xpath(".//text()").get().strip()
+                #print(country)
+                
+        if country == 'Contestants':
+            country_cell = row.xpath(".//td")[0]
+            td_adjust = 1
+                    
+            country = country_cell.xpath(".//text()").get().strip()
+            
+        return td_adjust, country

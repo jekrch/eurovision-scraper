@@ -26676,7 +26676,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,fr,gr,tv,3
 2023,f,fr,al,tv,3
 2023,f,fr,lt,tv,1
-2023,f,fr,Rest of the World,tv,1
+2023,f,fr,row,tv,1
 2023,f,cy,md,tv,3
 2023,f,cy,sm,tv,5
 2023,f,cy,az,tv,6
@@ -26689,7 +26689,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,cy,gr,tv,12
 2023,f,cy,al,tv,7
 2023,f,es,pt,tv,3
-2023,f,es,Rest of the World,tv,2
+2023,f,es,row,tv,2
 2023,f,se,ua,tv,3
 2023,f,se,it,tv,3
 2023,f,se,lv,tv,8
@@ -26725,7 +26725,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,se,al,tv,10
 2023,f,se,lt,tv,7
 2023,f,se,gb,tv,5
-2023,f,se,Rest of the World,tv,7
+2023,f,se,row,tv,7
 2023,f,al,it,tv,7
 2023,f,al,mt,tv,3
 2023,f,al,at,tv,3
@@ -26735,7 +26735,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,al,ch,tv,12
 2023,f,al,si,tv,7
 2023,f,al,gr,tv,4
-2023,f,al,Rest of the World,tv,6
+2023,f,al,row,tv,6
 2023,f,it,nl,tv,3
 2023,f,it,mt,tv,12
 2023,f,it,md,tv,5
@@ -26805,7 +26805,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,fi,al,tv,6
 2023,f,fi,lt,tv,12
 2023,f,fi,gb,tv,12
-2023,f,fi,Rest of the World,tv,10
+2023,f,fi,row,tv,10
 2023,f,cz,ua,tv,2
 2023,f,cz,it,tv,2
 2023,f,cz,lv,tv,1
@@ -26846,7 +26846,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,am,ge,tv,12
 2023,f,am,cz,tv,2
 2023,f,am,gr,tv,2
-2023,f,am,Rest of the World,tv,8
+2023,f,am,row,tv,8
 2023,f,md,ua,tv,6
 2023,f,md,it,tv,12
 2023,f,md,ie,tv,4
@@ -26891,7 +26891,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,ua,cz,tv,12
 2023,f,ua,lt,tv,10
 2023,f,ua,gb,tv,4
-2023,f,ua,Rest of the World,tv,5
+2023,f,ua,row,tv,5
 2023,f,no,ua,tv,7
 2023,f,no,it,tv,10
 2023,f,no,lv,tv,3
@@ -26927,7 +26927,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,no,gr,tv,6
 2023,f,no,al,tv,4
 2023,f,no,gb,tv,7
-2023,f,no,Rest of the World,tv,4
+2023,f,no,row,tv,4
 2023,f,de,at,tv,6
 2023,f,de,fi,tv,5
 2023,f,de,ch,tv,4
@@ -26968,7 +26968,7 @@ year,round,country,votingCountry,voteType,points
 2023,f,il,al,tv,5
 2023,f,il,lt,tv,3
 2023,f,il,gb,tv,3
-2023,f,il,Rest of the World,tv,12
+2023,f,il,row,tv,12
 2023,f,si,lv,tv,2
 2023,f,si,az,tv,5
 2023,f,si,fi,tv,7
@@ -26999,6 +26999,6 @@ year,round,country,votingCountry,voteType,points
 2023,f,hr,si,tv,12
 2023,f,hr,al,tv,8
 2023,f,hr,lt,tv,4
-2023,f,hr,Rest of the World,tv,3
+2023,f,hr,row,tv,3
 2023,f,gb,ua,tv,5
 2023,f,gb,mt,tv,4
