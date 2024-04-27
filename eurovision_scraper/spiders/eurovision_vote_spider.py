@@ -16,6 +16,10 @@ class EurovisionSpider(scrapy.Spider):
         Note that two character country codes are used except for when the voting source 
         is 'Rest of the World', which is represented with the three character code 'row'
     '''
+    custom_settings = {
+        'FEED_URI': 'eurovision_vote_data.csv'
+    }
+    
     name = 'eurovision_vote'
     start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in list(range(1956, 2020)) + list(range(2021, 2024))] # note that we're skipping 2020
 
