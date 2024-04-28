@@ -1,14 +1,51 @@
-# eurovision-scraper
-A web-scraper for collecting publicly available data from Wikipedia on the Eurovision Song Contest.
+# Eurovision Scraper :pick:
 
-## getting started
+Eurovision Scraper is a web scraper designed to collect publicly available data from Wikipedia about the Eurovision Song Contest. It gathers information on voting results and participant details, which can be useful for analysis, visualizations, or building applications related to the Eurovision Song Contest. 
 
-1. install [scrapy](https://scrapy.org/): `pip install scrapy`
-2. execute scraper 
-    * voting data saved to `/eurovision_vote_data.csv`
-        * `scrapy crawl eurovision_vote` or
-        * `python -m scrapy crawl eurovision_vote`
+## Prerequisites
 
-   * participant data saved to `/eurovision_participant_data.csv`
-        * `scrapy crawl eurovision_participant` or
-        * `python -m scrapy crawl eurovision_participant`
+- Python 3.x
+- [Scrapy](https://scrapy.org/) (can be installed via `pip install scrapy`)
+
+## Installation
+
+1. Clone the repository: `git clone https://github.com/jekrch/eurovision-scraper.git`
+2. Navigate to the project directory: `cd eurovision-scraper`
+3. Install the required dependencies: `pip install -r requirements.txt`
+
+## Usage
+
+### Direct Execution
+
+1. Execute the voting data scraper: `scrapy crawl eurovision_vote`
+   - voting data is saved to `/eurovision_vote_data.csv`
+
+2. Execute the participant data scraper: `scrapy crawl eurovision_participant`
+   - participant data is saved to `/eurovision_participant_data.csv`
+
+### Docker
+
+1. Build the Docker image: `docker-compose build`
+2. Run the scraper: `docker-compose up`
+   - voting data is saved to `/eurovision_vote_data.csv` 
+   - participant data is saved to `eurovision_participant_data.csv`
+
+## Contributing
+
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+
+
+## Future Improvements
+
+- Add support for scraping data from other language versions of Wikipedia.
+- Implement error handling and retries for failed scraping attempts.
+- Add support for lyrics and youtube links
+
+## References
+
+- [Eurovision Song Contest on Wikipedia](https://en.wikipedia.org/wiki/Eurovision_Song_Contest)

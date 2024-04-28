@@ -1,0 +1,12 @@
+version: '3'
+services:
+  scraper:
+    build: .
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+        python -m scrapy crawl eurovision_vote &&
+        python -m scrapy crawl eurovision_participant &&
+        mv *.csv /app
+      "
