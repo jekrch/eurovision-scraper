@@ -17,7 +17,8 @@ class EurovisionSpider(scrapy.Spider):
         is 'Rest of the World', which is represented with the three character code 'row'
     '''
     custom_settings = {
-        'FEED_URI': 'eurovision_vote_data.csv'
+        'FEED_URI': 'eurovision_vote_data.csv',
+        'CONCURRENT_REQUESTS': 1
     }
     
     name = 'eurovision_vote'
@@ -25,7 +26,7 @@ class EurovisionSpider(scrapy.Spider):
 
     def parse(self, response):
 
-        time.sleep(1)  # 1 second delay between requests
+        #time.sleep(1)  # 1 second delay between requests
 
         try:
             year = response.url.split('_')[-1]
@@ -190,9 +191,23 @@ class EurovisionSpider(scrapy.Spider):
         if country == 'Contestants':
             country_cell = row.xpath(".//td")[0]
             td_adjust = 1
-                    
             country = country_cell.xpath(".//text()").get().strip()
             
+        if country.isnumeric():
+            td_adjust = 1
+            
+        numeric_shift = False
+        
+        while country == 'Contestants' or country.isnumeric():
+            numeric_shift = True
+            country_cell = row.xpath(".//th")[td_adjust]
+            td_adjust += 1
+            country = country_cell.xpath(".//text()").get().strip()
+
+        
+        if (numeric_shift):
+            td_adjust -= 2
+                     
         return td_adjust, country
     
     
