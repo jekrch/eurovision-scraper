@@ -14,7 +14,7 @@ class EurovisionSpider(scrapy.Spider):
     start_urls = [f'https://en.wikipedia.org/wiki/Eurovision_Song_Contest_{year}' for year in list(range(1956, 2020)) + list(range(2021, 2024))]
 
     def parse(self, response):
-        time.sleep(1)  # 1 second delay between requests
+        #time.sleep(1)  # 1 second delay between requests
         try:
             year = response.url.split('_')[-1]
             results = []
