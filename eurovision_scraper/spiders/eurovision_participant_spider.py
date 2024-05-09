@@ -52,7 +52,7 @@ class EurovisionSpider(scrapy.Spider):
                     'songWikiUrl': response.urljoin(song_url) if song_url else '',
                     'language': language,
                     'songwriters': songwriters,
-                    'conductors': conductors
+                    'conductors': conductors if not conductors.startswith('[') else ''
                 }
                 results.append(result)
 

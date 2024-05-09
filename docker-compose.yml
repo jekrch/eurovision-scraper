@@ -8,5 +8,6 @@ services:
       sh -c "
         python -m scrapy crawl eurovision_vote &&
         python -m scrapy crawl eurovision_participant &&
+        python -m scrapy crawl eurovision_results &&
         mv *.csv /app
       "
