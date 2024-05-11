@@ -3,7 +3,7 @@ import scrapy
 class EurovisionResultsSpider(scrapy.Spider):
     name = 'eurovision_results'
     custom_settings = {
-        'FEED_URI': 'eurovision_results_data.csv',
+        'FEED_URI': 'eurovision_result_data.csv',
         'FEED_EXPORT_FIELDS': ['year', 'country', 'runningOrder', 'place'],
     }
 

@@ -24,7 +24,7 @@ Eurovision Scraper is a web scraper designed to collect publicly available data 
    - participant data is saved to `/eurovision_participant_data.csv`
 
 3. Execute the result data scraper: `scrapy crawl eurovision_results`
-   - result data is saved to `/eurovision_results_data.csv`
+   - result data is saved to `/eurovision_result_data.csv`
 
 ### Docker
 
@@ -32,7 +32,7 @@ Eurovision Scraper is a web scraper designed to collect publicly available data 
 2. Run the scraper: `docker-compose up`
    - voting data is saved to `/eurovision_vote_data.csv` 
    - participant data is saved to `eurovision_participant_data.csv`
-   - result data is saved to `eurovision_results_data.csv`
+   - result data is saved to `eurovision_result_data.csv`
 
 ## Contributing
 
