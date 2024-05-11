@@ -3,7 +3,7 @@ import scrapy
 class EurovisionResultsSpider(scrapy.Spider):
     name = 'eurovision_results'
     custom_settings = {
-        'FEED_URI': 'eurovision_results.csv',
+        'FEED_URI': 'eurovision_results_data.csv',
         'FEED_EXPORT_FIELDS': ['year', 'country', 'runningOrder', 'place'],
     }
 
@@ -21,6 +21,11 @@ class EurovisionResultsSpider(scrapy.Spider):
             table = response.xpath('//table[contains(./caption, "Results of the final of the Eurovision Song Contest")]')
             
         # If the table is not found using the caption, try finding it using the legend div
+        
+        if not table:
+            table = response.xpath('//div[@class="legend"][contains(., "Winner")]/following-sibling::table[1][.//th[contains(., "R/O")]]')
+            
+            
         if not table:
             table = response.xpath('//div[@class="legend"][contains(., "Winner")]/following-sibling::table[1]')
     
