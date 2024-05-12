@@ -1,5 +1,6 @@
 import scrapy
 import time
+import json
 from eurovision_scraper.spiders.country_data import country_map
 
 
@@ -45,7 +46,16 @@ class EurovisionSpider(scrapy.Spider):
             else: 
                 raise Exception(f'Invalid year {year}')
                 
-            return results
+            # deduplicate results 
+            unique_rows = set() 
+
+            for row in results:
+                key = tuple(row.values()) 
+                if key not in unique_rows:
+                    unique_rows.add(key)
+                    yield row
+            
+            #return results
                 
         except Exception as e:
             self.logger.error(f"Error parsing {response.url}: {e}")
@@ -262,7 +272,17 @@ class EurovisionSpider(scrapy.Spider):
                     if point is None or point == '':
                         continue
                 
-                    voting_country_cell = header_row.xpath(f".//th[{i + header_idx_adjust}]")[0]
+                    voting_country_cell = header_row.xpath(f".//th[{i + header_idx_adjust}]")
+                    
+                    if not voting_country_cell:
+                        voting_country_cell = header_row.xpath(f".//td[{i + header_idx_adjust}]")
+                    
+                    if not voting_country_cell:
+                        print('skipping ' + country)
+                        continue; 
+                    
+                    voting_country_cell = voting_country_cell[0]
+                    
                     voting_country = voting_country_cell.xpath(".//text()").get().strip()
 
                     # we should skip this point value in two scenarios 
@@ -282,7 +302,7 @@ class EurovisionSpider(scrapy.Spider):
 
         except Exception as e:
             self.logger.error(f"Error in parse_table for {response.url}: {e}")
-            #raise
+            raise
             return []
         
     def get_pre_2016_results(self, response, year, results):
@@ -290,7 +310,7 @@ class EurovisionSpider(scrapy.Spider):
             Fetches results from contests up to 2015. There are a few ways that voting results data 
             can be displayed in each wiki article, which is reflected below. 
         '''    
-            
+         
         # first try to get the final results from pages where there are also semi-finals
         final_results = self.parse_table_pre_2016(response, year, 'Detailed voting results of the final', 'f', 't', -1)
         results.extend(final_results)
@@ -327,76 +347,3 @@ class EurovisionSpider(scrapy.Spider):
         results.extend(semi_final2)
             #raise
 
-
-    def parse_table_pre_2016(self, response, year, table_header, round_name, vote_type, header_idx_adjust):
-        '''
-            Returns voting result data if available. First look for a table with the provided
-            header name. If none is found, return empty array. Otherwise, parse the country-country
-            voting counts. 
-            
-            The header_ids_adjust is used to account for slight differences in how some tables are 
-            structured which can alter the index at which the required column headers (votingCountry) 
-            need to be selected 
-        '''  
-        try:
-            row_idx_adjust = 0
-             
-            # the voting results tables are labeled either via an overhead h2 or a table caption
-            table_selector = response.xpath(
-                f"//table[contains(@class, 'wikitable') and "
-                f"(./preceding::h2[contains(., '{table_header}')] or ./caption[contains(., '{table_header}')])]"
-            )
-
-            if not table_selector:
-                print(f'No table found for {year} with name "{table_header}"')
-                return
-
-            table = table_selector[0]
-            rows = table.xpath(".//tr")
-            
-            header_row = rows[0 + row_idx_adjust]
-            data_rows = rows[1 + row_idx_adjust:]
-
-            for row in data_rows:
-                
-                if not row.xpath(".//th"):
-                    print(row)
-                    continue
-                
-                country_cell = row.xpath(".//th")[0]
-                country = country_cell.xpath(".//text()").get().strip()
-
-                if country == 'Contestants':
-                    country_cell = row.xpath(".//th")[1]
-                    country = country_cell.xpath(".//text()").get().strip()
-                    #print(country)
-
-                points = [td.xpath(".//text()").get().strip() if td.xpath(".//text()").get() else None
-                          for td in row.xpath(".//td")]                          
-
-                for i, point in enumerate(points, start=2):
-                    if point is None or point == '':
-                        continue
-                
-                    voting_country_cell = header_row.xpath(f".//th[{i + header_idx_adjust}]")[0]
-                    voting_country = voting_country_cell.xpath(".//text()").get().strip()
-
-                    # we should skip this point value in two scenarios 
-                    # 1. if the voting_country has an html name or is called 'Total score', it's a total count, which we aren't tracking here 
-                    # 2. if the voting_country and country are the same, skip it (we don't want totals here)
-                    if voting_country.startswith('.') or voting_country == 'Total score' or voting_country == country or ' score' in voting_country or country_map.get(voting_country) == None:
-                        continue
-
-                    yield {
-                        'year': year,
-                        'round': round_name,
-                        'country': country_map.get(country, country),
-                        'votingCountry': country_map.get(voting_country, voting_country),
-                        'voteType': vote_type, 
-                        'points': point.strip()
-                    }
-
-        except Exception as e:
-            self.logger.error(f"Error in parse_table for {response.url}: {e}")
-            #raise
-            return []
