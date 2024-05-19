@@ -22,7 +22,7 @@ class EurovisionResultsSpider(scrapy.Spider):
 
             # The table name format changed after the 2003 articles
             if not table:
-                table = response.xpath('//table[contains(./caption, "Results of the final of the Eurovision Song Contest")]')
+                table = response.xpath('//table[contains(./caption, "esults of the final of the Eurovision Song Contest")]')
 
             # If the table is not found using the caption, try finding it using the legend div
             if not table:
