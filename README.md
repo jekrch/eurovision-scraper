@@ -1,6 +1,6 @@
 # Eurovision Scraper :pick:
 
-Eurovision Scraper is a web scraper designed to collect publicly available data from Wikipedia about the Eurovision Song Contest. It gathers information on voting results and participant details, which can be useful for analysis, visualizations, or building applications related to the Eurovision Song Contest. 
+Eurovision Scraper is a web scraper designed to collect publicly available data from Wikipedia about the Eurovision Song Contest. It gathers voting results and participant details from all contest years (1956 to the present). This can be useful for analysis, visualizations, or building applications related to the Eurovision Song Contest. 
 
 ## Prerequisites
 
